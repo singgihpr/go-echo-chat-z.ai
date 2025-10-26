@@ -4,8 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageArea = document.getElementById('messageArea');
     const typingIndicator = document.getElementById('typingIndicator');
 
-    // Fungsi untuk menambahkan pesan ke area chat
-    const addMessage = (sender, text) => {
+    const addMessage = (sender, content) => {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', sender);
 
@@ -13,18 +12,21 @@ document.addEventListener('DOMContentLoaded', () => {
         senderElement.classList.add('sender');
         senderElement.textContent = sender === 'user' ? 'Anda' : 'GLM-4.5-Flash';
 
-        const textElement = document.createElement('div');
-        textElement.textContent = text;
+        const contentElement = document.createElement('div');
+        
+        if (sender === 'ai') {
+            contentElement.innerHTML = marked.parse(content);
+        } else {
+            contentElement.textContent = content;
+        }
 
         messageElement.appendChild(senderElement);
-        messageElement.appendChild(textElement);
+        messageElement.appendChild(contentElement);
         messageArea.appendChild(messageElement);
         
-        // Scroll ke bawah
         messageArea.scrollTop = messageArea.scrollHeight;
     };
 
-    // Fungsi untuk menampilkan/menyembunyikan indikator mengetik
     const setTypingIndicator = (show) => {
         if (show) {
             const indicator = document.createElement('div');
@@ -41,16 +43,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Fungsi untuk mengirim pesan
     const sendMessage = async () => {
         const message = messageInput.value.trim();
         if (message === '') return;
 
-        // Tambahkan pesan user ke UI
         addMessage('user', message);
         messageInput.value = '';
 
-        // Tampilkan indikator mengetik
         setTypingIndicator(true);
 
         try {
@@ -68,10 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            // Sembunyikan indikator mengetik
             setTypingIndicator(false);
 
-            // Tambahkan pesan AI ke UI
             if (data.reply) {
                 addMessage('ai', data.reply);
             } else {
@@ -85,16 +82,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Event listener untuk tombol kirim
     sendButton.addEventListener('click', sendMessage);
 
-    // Event listener untuk tombol Enter di input
     messageInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             sendMessage();
         }
     });
 
-    // Pesan pembuka dari AI
     addMessage('ai', 'Halo! Saya adalah asisten AI yang didukung oleh GLM-4.5-Flash. Ada yang bisa saya bantu?');
 });

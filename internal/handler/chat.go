@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 
 	"backend-ai/internal/service"
 
@@ -51,12 +52,12 @@ func (h *ChatHandler) Chat(c echo.Context) error {
 	}
 
 	// Karena response dari service v4 tidak memiliki field `Data`, kita akses langsung `resp.Choices`
-	if len(resp.Choices) == 0 { // <-- DIUBAH: hapus .Data
+	if len(resp.Choices) == 0 {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "No response from AI"})
 	}
 
 	// Return the AI response
 	return c.JSON(http.StatusOK, ChatResponse{
-		Reply: resp.Choices[0].Message.Content, // <-- DIUBAH: hapus .Data
+		Reply: strings.TrimSpace(resp.Choices[0].Message.Content),
 	})
 }
